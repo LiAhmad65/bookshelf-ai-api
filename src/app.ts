@@ -8,10 +8,18 @@ const app:Express = express()
 
 app.use(express.json())
 
-// Configure CORS to allow requests from Vite
+// Configure CORS: local Vite dev server + deployed frontend(s).
+// Set CLIENT_URL on Render to your FE URL (comma-separate multiple URLs).
+const allowedOrigins = [
+  'http://localhost:5173',
+  ...(process.env.CLIENT_URL || '').split(','),
+]
+  .map((origin) => origin.trim().replace(/\/$/, '')) // ignore trailing slashes
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Your React/Vite dev server URL
+    origin: allowedOrigins,
     credentials: true,
   })
 );
