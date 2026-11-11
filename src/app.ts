@@ -1,5 +1,6 @@
 import "dotenv/config"; // load .env before anything reads process.env
-import express, {Express, Request, Response} from 'express';
+import express, {Express, NextFunction, Request, Response} from 'express';
+import { connectDB } from "./config/db";
 import userRoutes from "./routes/user.routes";
 import bookRoutes from "./routes/book.routes";
 import aiRoutes from "./routes/ai.routes";
@@ -26,7 +27,7 @@ app.use(
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).send(`
-    <!進入html>
+    <!DOCTYPE html>
     <html>
       <head>
         <title>Server Health</title>
@@ -45,6 +46,17 @@ app.get('/health', (req: Request, res: Response) => {
       </body>
     </html>
   `);
+});
+
+// Connect to MongoDB before handling API requests.
+// Required on Vercel, which runs this file directly and never runs server.ts.
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(503).json({ success: false, message: "Database unavailable" });
+  }
 });
 
 // API routes

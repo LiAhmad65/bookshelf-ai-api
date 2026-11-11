@@ -1,18 +1,15 @@
+// Local development entry point (npm run dev / npm start).
+// On Vercel this file is not used — src/app.ts is served directly.
 import app from "./app";
-import dotenv from 'dotenv';
 import { connectDB } from "./config/db";
-import { cache } from "./utils/cache"; // Cache import karein
 
-dotenv.config();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-
-// 1. Connect to Database first, then start the server
+// Connect to Database first, then start the server
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
-    
     });
   })
   .catch((error) => {
