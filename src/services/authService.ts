@@ -4,7 +4,12 @@ import jwt from "jsonwebtoken";
 import { Users } from "../models/users";
 import { LoginInput, SignupInput } from "../validations/authValidation";
 
-const JWT_SECRET = process.env.JWT_SECRET || "shhhhh";
+// Read lazily so dotenv has loaded before first use; never fall back to a default secret
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET environment variable is missing");
+  return secret;
+};
 
 // Create User
 export const registerUserService = async (payload: SignupInput) => {
@@ -32,13 +37,13 @@ export const registerUserService = async (payload: SignupInput) => {
   // 5. Generate JWT Token
   const token = jwt.sign(
     { userId: newUser._id, email: newUser.email },
-    JWT_SECRET,
+    getJwtSecret(),
   );
 
   // 6. Convert user object to plain object and remove sensitive data for FE response
   const userObject = newUser.toObject();
   delete userObject.password;
-  return { user: newUser, token };
+  return { user: userObject, token };
 };
 
 // Login User
@@ -61,7 +66,7 @@ export const loginUserService = async (payload: LoginInput) => {
   }
 
   // 3. Generate fresh JWT token
-  const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET);
+  const token = jwt.sign({ userId: user.id, email: user.email }, getJwtSecret());
 
   // 4. Exclude password before returning user for FE response
   const userObject = user.toObject();
@@ -72,7 +77,7 @@ export const loginUserService = async (payload: LoginInput) => {
 };
 
 export const getUserByIdService = async(id:string)=>{
-  const user = await Users.findOne({_id:id})
+  const user = await Users.findOne({_id:id}).select("-password")
   if(!user){
     throw new Error("User not found")
   }

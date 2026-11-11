@@ -22,7 +22,11 @@ export const authenticateToken = async (
       .json({ success: false, message: "Access token missing or invalid" });
     return;
   }
-  const secret = process.env.JWT_SECRET || "shhhhh";
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    res.status(500).json({ success: false, message: "Server auth is not configured" });
+    return;
+  }
   try {
     const decoded = jwt.verify(token, secret);
     req.user = decoded;

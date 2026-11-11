@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Local DB seed script
+seed.ts
+
 # Build output
 dist/
 
