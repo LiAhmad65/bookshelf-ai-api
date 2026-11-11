@@ -1,3 +1,4 @@
+import "dotenv/config"; // load .env before anything reads process.env
 import express, {Express, Request, Response} from 'express';
 import userRoutes from "./routes/user.routes";
 import bookRoutes from "./routes/book.routes";
@@ -8,12 +9,10 @@ const app:Express = express()
 
 app.use(express.json())
 
-// Configure CORS: local Vite dev server + deployed frontend(s).
-// Set CLIENT_URL on Render to your FE URL (comma-separate multiple URLs).
-const allowedOrigins = [
-  'http://localhost:5173',
-  ...(process.env.CLIENT_URL || '').split(','),
-]
+// Configure CORS: allowed frontend origins come from CLIENT_URL
+// (comma-separate multiple URLs, e.g. "http://localhost:5173,https://my-fe.com")
+const allowedOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
   .map((origin) => origin.trim().replace(/\/$/, '')) // ignore trailing slashes
   .filter(Boolean);
 
